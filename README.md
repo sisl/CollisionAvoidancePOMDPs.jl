@@ -70,8 +70,8 @@ b′ = update(up, b, a, o)
 
 ```math
 \begin{gather}
-\mathbf{f}_T \texttt{ (transition)} \tag{transition dynamics function}\\
-\mathbf{f}_O \texttt{ (observation)} \tag{observation dynamics function}
+\mathbf{f}_T \texttt{ (POMDPs.transition)} \tag{transition dynamics function}\\
+\mathbf{f}_O \texttt{ (POMDPs.observation)} \tag{observation dynamics function}
 \end{gather}
 ```
 
