@@ -7,7 +7,7 @@
     reward_collision::Float64 = -100.0         # reward obtained if collision occurs
     reward_change::Float64 = -1                # reward obtained if action changes
     px = DiscreteNonParametric([2.0, 0.0, -2.0], [0.25, 0.5, 0.25]) # transition noise on relative vertical rate [m/s²]
-    σobs = [15, 1, eps(), 5]                   # observation noise [h_rel, dh_rel, a_prev, τ]
+    σobs = [15, 1, eps(), eps()]               # observation noise [h_rel, dh_rel, a_prev, τ]
     γ = 0.99                                   # discount factor
 end
 
@@ -68,7 +68,7 @@ function POMDPs.observation(pomdp::CollisionAvoidancePOMDP, sp)
     h_rel_obs = Normal(sp[1], pomdp.σobs[1])
     dh_rel_obs = Normal(sp[2], pomdp.σobs[2])
     a_prev_obs = DiscreteNonParametric([sp[3]], [1.0])
-    τ_obs = Normal(sp[4], pomdp.σobs[4])
+    τ_obs = DiscreteNonParametric([sp[4]], [1.0])
     return product_distribution(h_rel_obs, dh_rel_obs, a_prev_obs, τ_obs)
 end
 

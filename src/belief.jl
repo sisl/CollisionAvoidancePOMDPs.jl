@@ -19,10 +19,12 @@ function POMDPs.update(up::CASBeliefUpdater, b::CASBelief, a, o)
     μ′ = b_ukf′.μ
     Σ′ = b_ukf′.Σ
 
-    # discrete & deterministic `a_prev`
-    μ′[3] = trunc(Int, μ′[3])
-    Σ′[:,3] .= 0
-    Σ′[3,:] .= 0
+    # discrete and deterministic `a_prev` and `τ`
+    for i in [3, 4]
+        μ′[i] = trunc(Int, μ′[i])
+        Σ′[:,i] .= 0
+        Σ′[i,:] .= 0
+    end
 
     return CASBelief(UKFBelief(μ′, Σ′, b.ukf.ϵ))
 end
