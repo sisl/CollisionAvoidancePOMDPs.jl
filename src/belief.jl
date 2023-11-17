@@ -21,7 +21,7 @@ function POMDPs.update(up::CASBeliefUpdater, b::CASBelief, a, o)
 
     # discrete and deterministic `a_prev` and `τ`
     for i in [3, 4]
-        μ′[i] = trunc(Int, μ′[i])
+        μ′[i] = round(Int, μ′[i])
         Σ′[:,i] .= 0
         Σ′[i,:] .= 0
     end
