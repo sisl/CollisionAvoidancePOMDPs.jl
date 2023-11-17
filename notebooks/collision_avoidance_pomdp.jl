@@ -34,6 +34,11 @@ md"""
 # ╔═╡ adbd3d35-89db-4776-9fd3-56bd2d8e3044
 pomdp = CollisionAvoidancePOMDP()
 
+# ╔═╡ c33b5b0e-5687-48f6-99fd-78850bf603d9
+md"""
+$\pmb{\upmu}$
+"""
+
 # ╔═╡ 5af8c4b2-d151-4110-8b25-96b7988b657c
 md"""
 # Plotting
@@ -149,6 +154,7 @@ docs(:update)
 # ╟─2cfe158a-0f0d-42e6-bd91-4ca10114d29d
 # ╟─49d51e0c-ed4b-40e3-8e07-fe48350dabca
 # ╟─eaa79ae4-a4fa-4030-9dd2-452a24338394
+# ╠═c33b5b0e-5687-48f6-99fd-78850bf603d9
 # ╟─f69e9d03-ff87-448c-a447-59b14518c047
 # ╟─5af8c4b2-d151-4110-8b25-96b7988b657c
 # ╟─7dc77c34-30f1-4f6d-a427-95e35bf96c55

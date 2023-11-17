@@ -9,6 +9,24 @@ using CollisionAvoidancePOMDPs
     policy = RandomPolicy(pomdp)
 
     h = simulate(HistoryRecorder(), pomdp, policy, up)
+
+    @test true
+end
+
+@testset "README UFK usage" begin
+    using CollisionAvoidancePOMDPs
+
+    pomdp = CollisionAvoidancePOMDP()
+    up = UKFUpdater(pomdp; λ=1.0)
+
+    ds = initialstate(pomdp)
+    b::UKFBelief = initialize_belief(up, ds)
+    s = rand(b)
+    a = rand(actions(pomdp))
+    o = rand(observation(pomdp, a, s))
+    b′ = update(up, b, a, o)
+
+    @test true
 end
 
 @testset "POMDP" begin

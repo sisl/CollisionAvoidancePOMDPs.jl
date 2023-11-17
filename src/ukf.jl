@@ -3,8 +3,8 @@
 Derivative free! How clean!
 
 $$\begin{gather}
-\mathbf f_T \texttt{ (transition)} \tag{transition dynamics function}\\
-\mathbf f_O \texttt{ (observation)} \tag{observation dynamics function}
+\mathbf{f}_T \texttt{ (transition)} \tag{transition dynamics function}\\
+\mathbf{f}_O \texttt{ (observation)} \tag{observation dynamics function}
 \end{gather}$$
 """
 @with_kw mutable struct UKFUpdater{P<:POMDP} <: Updater
@@ -31,14 +31,14 @@ end
 end
 
 @doc raw"""
-##### UKF prediction
+##### UKF prediction:
 
 Predict where the agent is going based on the nonlinear transition function $\mathbf{f}_T$.
 
 ##### UKF update:
 
 1. Update observation model using predicted mean and covariance.
-2. Calculate the _cross covariance matrix_ (measures the variance between two multi-dimensional variables; here it's the transition prediction $\mu_p$ and observation model update $\mu_o$).
+2. Calculate the _cross covariance matrix_ (measures the variance between two multi-dimensional variables; here it's the transition prediction $𝛍_p$ and observation model update $𝛍_o$).
 3. Update mean and covariance of our belief.
 """
 function POMDPs.update(up::UKFUpdater, b::UKFBelief, a, o)
@@ -68,6 +68,8 @@ end
 @doc raw"""
 ##### Sigma point samples:
 
+Create a set of sigma point samples as an approximation for $𝛍′$ and $𝚺′$ that will be updated by the UKF (instead of updating the non-linear, multi-variate Gaussian directly). Common sigma points include the mean $𝛍 \in \mathbb{R}^n$ and $2n$ points formed from perturbations of $𝛍$ in directions determined by the covariance matrix $𝚺$:
+
 $$\begin{align}
 𝐬_1 &= 𝛍\\
 𝐬_{2i} &= 𝛍 + \left(\sqrt{(n+\lambda)𝚺}\right)_i \quad \text{for } i \text{ in } 1\text{:}n\\
@@ -88,6 +90,8 @@ end
 
 @doc raw"""
 ##### Sigma point weights:
+
+The sigma points are associated with the weights:
 
 $$\begin{align}
 \lambda &= \text{spread parameter}\\
