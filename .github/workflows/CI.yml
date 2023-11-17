@@ -42,7 +42,7 @@ jobs:
             ${{ runner.os }}-${{ matrix.arch }}-
             ${{ runner.os }}-
 
-      # build the depencies, run the tests, and upload coverage results
+      # build the dependencies, run the tests, and upload coverage results
       - uses: julia-actions/julia-buildpkg@latest
       - run: |
           git config --global user.name Tester
