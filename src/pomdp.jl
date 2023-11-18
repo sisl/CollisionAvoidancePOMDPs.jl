@@ -1,7 +1,7 @@
 @with_kw struct CollisionAvoidancePOMDP <: POMDP{Vector{Float64}, Float64, Vector{Float64}}
     h_rel_range::Vector{Real} = [-10, 10] # initial relative altitudes [m]
     dh_rel_range::Vector{Real} = [-1, 1]  # initial relative vertical rates [m²]
-    ddh_max::Real = 1.0                   # vertical acceleration limit [m/s²]
+    ddh_max::Real = 3.0                   # vertical acceleration limit [m/s²]
     τ_max::Real = 40                      # max time to closest approach [s]
     actions::Vector{Real} = [0.0, -5, 5]  # relative vertical rate actions [m/s²] (tie break zero)
     collision_threshold::Real = 50        # collision threshold [m]
