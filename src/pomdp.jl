@@ -6,7 +6,7 @@
     actions::Vector{Real} = [-5, 0.0, 5]    # relative vertical rate actions [m/s²]
     collision_threshold::Real = 50          # collision threshold [m]
     reward_collision::Real = -100           # reward obtained if collision occurs
-    reward_reversal::Real = -0              # reward obtained if action reverses direction (e.g., from +5 to -5)
+    reward_reversal::Real = 0               # reward obtained if action reverses direction (e.g., from +5 to -5)
     reward_alert::Real = -1                 # reward obtained if alerted (i.e., non-zero vertical rates)
     px = DiscreteNonParametric([1, 0.0, -1], [0.25, 0.5, 0.25]) # transition noise on relative vertical rate [m/s²]
     σobs::Vector{Real} = [15, 1, eps(), eps()] # observation noise [h_rel, dh_rel, a_prev, τ]
