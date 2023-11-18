@@ -29,7 +29,9 @@ export
     get_obs_h_rel,
     get_belief_mean_h_rel,
     get_belief_std_h_rel,
-    get_rewards
+    get_rewards,
+    generate_histories,
+    plot_histories
 
 include("pomdp.jl")
 include("ukf.jl")

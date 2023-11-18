@@ -45,6 +45,15 @@ policy = RandomPolicy(pomdp)
 h = simulate(HistoryRecorder(), pomdp, policy, up)
 ```
 
+<p align="center">
+    <img src="./img/trajectories.svg">
+</p>
+
+|  |  |  |
+| :---: | :---: | :---: |
+| <kbd> <img src="./img/policy.svg"> </kbd> | <kbd> <img src="./img/value.svg"> </kbd> | <kbd> <img src="./img/pfail.svg"> </kbd> |
+
+
 ## Unscented Kalman filter 🧼
 _(Derivative free! How clean!)_
 
