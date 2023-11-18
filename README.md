@@ -14,7 +14,7 @@ Included is an implementation of the unscented Kalman filter for belief updating
 
 ```julia
 @with_kw struct CollisionAvoidancePOMDP <: POMDP{Vector{Float64}, Float64, Vector{Float64}}
-    h_rel_range::Vector{Real} = [-10, 10] # initial relative altitudes [m]
+    h_rel_range::Vector{Real} = [-75, 75] # initial relative altitudes [m]
     dh_rel_range::Vector{Real} = [-1, 1]  # initial relative vertical rates [m²]
     ddh_max::Real = 1.0                   # vertical acceleration limit [m/s²]
     τ_max::Real = 40                      # max time to closest approach [s]
