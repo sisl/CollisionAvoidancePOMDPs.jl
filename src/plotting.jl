@@ -68,7 +68,7 @@ function plot_history(pomdp::CollisionAvoidancePOMDP, h::SimHistory, t=length(h)
 end
 
 function overlay_aircraft!()
-	img = load("../img/airplane.png")
+	img = load(joinpath(@__DIR__, "..", "img", "airplane.png"))
 	xl = xlims()
 	yl = ylims()
 	ratio = sum(abs.(xl)) / (sum(abs.(yl)) + sum(abs.(xl)))
