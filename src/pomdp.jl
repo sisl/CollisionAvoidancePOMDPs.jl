@@ -96,7 +96,7 @@ end
 
 function isfailure(pomdp::CollisionAvoidancePOMDP, s)
     h_rel, dh_rel, a_prev, τ = s
-    return abs(h_rel) < pomdp.collision_threshold && abs(τ) < eps()
+    return abs(h_rel) < pomdp.collision_threshold && τ < eps()
 end
 
 POMDPs.convert_s(::Type{Vector{Float32}}, s::Vector{Float64}, ::CollisionAvoidancePOMDP) = Float32.(s)
