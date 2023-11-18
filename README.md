@@ -8,10 +8,16 @@ A simple aircraft collision avoidance POMDP in Julia (part of [POMDPs.jl](https:
 
 Included is an implementation of the unscented Kalman filter for belief updating.
 
+| Climb action | Descend action |
+| :---: | :---: |
+| <img src="./img/cas-climb.svg"> | <img src="./img/cas-descend.svg"> |
+
+<!--
 <p align="center">
     <img style="margin: 0 auto;" src="./img/cas-climb.svg">
     <img style="margin: 0 auto;" src="./img/cas-descend.svg">
 </p>
+-->
 
 ```julia
 @with_kw struct CollisionAvoidancePOMDP <: POMDP{Vector{Float64}, Float64, Vector{Float64}}
