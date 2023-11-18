@@ -49,7 +49,7 @@ h = simulate(HistoryRecorder(), pomdp, policy, up)
     <img src="./img/trajectories.svg">
 </p>
 
-|  |  |  |
+| Online CAS policy | Value function estimate | Probability of failure estimate |
 | :---: | :---: | :---: |
 | <kbd> <img src="./img/policy.svg"> </kbd> | <kbd> <img src="./img/value.svg"> </kbd> | <kbd> <img src="./img/pfail.svg"> </kbd> |
 
