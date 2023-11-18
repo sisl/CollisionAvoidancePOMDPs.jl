@@ -9,7 +9,8 @@ A simple aircraft collision avoidance POMDP in Julia (part of [POMDPs.jl](https:
 Included is an implementation of the unscented Kalman filter for belief updating.
 
 <p align="center">
-    <img src="./img/cas.svg">
+    <img style="margin: 0 auto;" src="./img/cas-climb.svg">
+    <img style="margin: 0 auto;" src="./img/cas-descend.svg">
 </p>
 
 ```julia
@@ -19,7 +20,7 @@ Included is an implementation of the unscented Kalman filter for belief updating
     ddh_max::Real = 1.0                     # vertical acceleration limit [m/s²]
     τ_max::Real = 40                        # max time to closest approach [s]
     actions::Vector{Real} = [-5, 0.0, 5]    # relative vertical rate actions [m/s²]
-    a_prev_zero::Bool = false               # whether to update `a_prev` when the action is zero
+    a_prev_zero::Bool = true                # whether to update `a_prev` when the action is zero
     collision_threshold::Real = 50          # collision threshold [m]
     reward_collision::Real = -100           # reward obtained if collision occurs
     reward_reversal::Real = -1              # reward obtained if action reverses direction (e.g., from +5 to -5)
@@ -52,7 +53,7 @@ h = simulate(HistoryRecorder(), pomdp, policy, up)
 
 | Online CAS policy | Value function estimate | Probability of failure estimate |
 | :---: | :---: | :---: |
-| <kbd> <img src="./img/policy.svg"> </kbd> | <kbd> <img src="./img/value.svg"> </kbd> | <kbd> <img src="./img/pfail.svg"> </kbd> |
+| <img src="./img/policy.svg"> | <img src="./img/value.svg"> | <img src="./img/pfail.svg"> |
 
 
 ## Unscented Kalman filter 🧼

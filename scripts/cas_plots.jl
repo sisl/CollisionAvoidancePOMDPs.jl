@@ -91,7 +91,10 @@ elseif plot_type == PfailPlot
     title_str = "failure probability estimate"
 end
 
-# Plots.heatmap(τ_range, h_rel_range, blur(policy_map, 1.5); xflip=true, label=false, size=(400,250), title=title_str, clims=(minimum(A), maximum(5)), kwargs...)
-Plots.heatmap(τ_range, h_rel_range, policy_map; xflip=true, label=false, size=(400,250), title=title_str, kwargs...)
+if plot_type == PolicyPlot
+    Plots.heatmap(τ_range, h_rel_range, blur(policy_map, 1.5); xflip=true, label=false, size=(400,250), title=title_str, clims=(minimum(A), maximum(5)), kwargs...)
+else
+    Plots.heatmap(τ_range, h_rel_range, policy_map; xflip=true, label=false, size=(400,250), title=title_str, kwargs...)
+end
 Plots.xlabel!(raw"time to closest approach ($\tau$)")
 Plots.ylabel!(raw"relative altitude ($h_\mathrm{rel}$)")
