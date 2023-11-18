@@ -1,16 +1,16 @@
 @with_kw struct CollisionAvoidancePOMDP <: POMDP{Vector{Float64}, Float64, Vector{Float64}}
-    h_rel_range::Vector{Real} = [-75, 75] # initial relative altitudes [m]
-    dh_rel_range::Vector{Real} = [-1, 1]  # initial relative vertical rates [m²]
-    ddh_max::Real = 1.0                   # vertical acceleration limit [m/s²]
-    τ_max::Real = 40                      # max time to closest approach [s]
-    actions::Vector{Real} = [-5, 0.0, 5]  # relative vertical rate actions [m/s²]
-    collision_threshold::Real = 50        # collision threshold [m]
-    reward_collision::Real = -100         # reward obtained if collision occurs
-    reward_reversal::Real = -0.1          # reward obtained if action reverses direction (e.g., from +5 to -5)
-    reward_alert::Real = -0.1             # reward obtained if alerted (i.e., non-zero vertical rates)
-    px = DiscreteNonParametric([0.1, 0.0, -0.1], [0.25, 0.5, 0.25]) # transition noise on relative vertical rate [m/s²]
+    h_rel_range::Vector{Real} = [-150, 150] # initial relative altitudes [m]
+    dh_rel_range::Vector{Real} = [-1, 1]    # initial relative vertical rates [m²]
+    ddh_max::Real = 1.0                     # vertical acceleration limit [m/s²]
+    τ_max::Real = 40                        # max time to closest approach [s]
+    actions::Vector{Real} = [-5, 0.0, 5]    # relative vertical rate actions [m/s²]
+    collision_threshold::Real = 50          # collision threshold [m]
+    reward_collision::Real = -100           # reward obtained if collision occurs
+    reward_reversal::Real = -0              # reward obtained if action reverses direction (e.g., from +5 to -5)
+    reward_alert::Real = -1                 # reward obtained if alerted (i.e., non-zero vertical rates)
+    px = DiscreteNonParametric([1, 0.0, -1], [0.25, 0.5, 0.25]) # transition noise on relative vertical rate [m/s²]
     σobs::Vector{Real} = [15, 1, eps(), eps()] # observation noise [h_rel, dh_rel, a_prev, τ]
-    γ::Real = 0.99                        # discount factor
+    γ::Real = 0.99                          # discount factor
 end
 
 @doc raw"""
@@ -59,14 +59,14 @@ function POMDPs.reward(pomdp::CollisionAvoidancePOMDP, s, a)
         # Collided
         r += pomdp.reward_collision
     end
-    # if a != 0
-    #     # Alerting
-    #     r += pomdp.reward_alert
-    # end
-    if a_prev == 0 && a != 0
-        # Alerted
+    if a != 0
+        # Alerting
         r += pomdp.reward_alert
     end
+    # if a_prev == 0 && a != 0
+    #     # Alerted
+    #     r += pomdp.reward_alert
+    # end
     if a_prev != 0 && a != 0 && a != a_prev
         # Reversed the action
         r += pomdp.reward_reversal

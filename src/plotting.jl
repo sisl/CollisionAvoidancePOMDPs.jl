@@ -30,7 +30,7 @@ function plot_history(pomdp::CollisionAvoidancePOMDP, h::SimHistory, t=length(h)
     plot!(X, get_h_rel(h)[1:t], label=false, xflip=true, c=:black, lw=1)
 
     if show_actions
-        AI = map(a->actionindex(pomdp, a), get_actions(h))
+        AI = map(a->actionindex(pomdp, a), get_actions(h)[1:t])
         markers = [:dtriangle, :square, :utriangle]
         stroke_colors = [action_colors[1], :gray, action_colors[3]]
         mark = [markers[ai] for ai in AI]
