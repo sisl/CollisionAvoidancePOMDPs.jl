@@ -30,8 +30,8 @@ function POMDPs.update(up::CASBeliefUpdater, b::CASBelief, a, o)
 end
 
 POMDPs.initialize_belief(up::UKFUpdater, ds::CASBelief) = CASBelief(UKFBelief(; μ=mean(ds), Σ=cov(ds)))
-function POMDPs.initialize_belief(up::CASBeliefUpdater, ds)
-    return CASBelief(initialize_belief(up.up_ukf, ds))
+function POMDPs.initialize_belief(up::CASBeliefUpdater, ds; kwargs...)
+    return CASBelief(initialize_belief(up.up_ukf, ds; kwargs...))
 end
 
 Statistics.mean(b::CASBelief) = b.ukf.μ

@@ -4,9 +4,10 @@
     ddh_max::Real = 1.0                     # vertical acceleration limit [m/s²]
     τ_max::Real = 40                        # max time to closest approach [s]
     actions::Vector{Real} = [-5, 0.0, 5]    # relative vertical rate actions [m/s²]
+    a_prev_zero::Bool = false               # whether to update `a_prev` when the action is zero
     collision_threshold::Real = 50          # collision threshold [m]
     reward_collision::Real = -100           # reward obtained if collision occurs
-    reward_reversal::Real = 0               # reward obtained if action reverses direction (e.g., from +5 to -5)
+    reward_reversal::Real = -1              # reward obtained if action reverses direction (e.g., from +5 to -5)
     reward_alert::Real = -1                 # reward obtained if alerted (i.e., non-zero vertical rates)
     px = DiscreteNonParametric([1, 0.0, -1], [0.25, 0.5, 0.25]) # transition noise on relative vertical rate [m/s²]
     σobs::Vector{Real} = [15, 1, eps(), eps()] # observation noise [h_rel, dh_rel, a_prev, τ]
@@ -45,7 +46,9 @@ function POMDPs.transition(pomdp::CollisionAvoidancePOMDP, s, a)
             dh_rel += sign(a - dh_rel)*pomdp.ddh_max
         end
     end
-    a_prev = a
+    if pomdp.a_prev_zero || a != 0
+        a_prev = a
+    end
     τ = max(τ - 1.0, -1.0)
 
     T = SparseCat([Float32[h_rel, dh_rel+x, a_prev, τ] for x in pomdp.px.support], pomdp.px.p)
@@ -59,14 +62,14 @@ function POMDPs.reward(pomdp::CollisionAvoidancePOMDP, s, a)
         # Collided
         r += pomdp.reward_collision
     end
-    if a != 0
-        # Alerting
-        r += pomdp.reward_alert
-    end
-    # if a_prev == 0 && a != 0
-    #     # Alerted
+    # if a != 0
+    #     # Alerting
     #     r += pomdp.reward_alert
     # end
+    if a_prev == 0 && a != 0
+        # Alerted
+        r += pomdp.reward_alert
+    end
     if a_prev != 0 && a != 0 && a != a_prev
         # Reversed the action
         r += pomdp.reward_reversal

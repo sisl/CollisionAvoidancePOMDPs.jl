@@ -125,10 +125,10 @@ end
 
 cross_cov(μₚ, μₒ, w, S, S′) = sum(w*(s - μₚ)*(s′ - μₒ)' for (w,s,s′) in zip(w,S,S′))
 
-function POMDPs.initialize_belief(up::UKFUpdater, ds::Distributions.ProductDistribution)
+function POMDPs.initialize_belief(up::UKFUpdater, ds::Distributions.ProductDistribution; nσ::Union{Real, Vector{<:Real}}=1)
     μ = [mean.(ds.dists)...]
-    n = length(μ)
-    Σ = diagm(0=>[std.(ds.dists)...])
+    @assert length(nσ) == 1 || length(nσ) == length(μ)
+    Σ = diagm(0=>nσ .* [std.(ds.dists)...])
     return UKFBelief(; μ, Σ)
 end
 
