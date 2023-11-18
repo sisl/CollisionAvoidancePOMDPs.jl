@@ -6,22 +6,47 @@ get_taus(h) = [step.s[4] for step in h]
 get_obs_h_rel(h) = [step.o[1] for step in h]
 get_belief_mean_h_rel(h) = [mean(step.b)[1] for step in h]
 get_belief_std_h_rel(h) = [cov(step.b)[1,1] for step in h]
+get_rewards(h) = [step.r for step in h]
+
+rectangle(w, h, x, y) = Shape(x .+ [0,w,w,0], y .+ [0,0,h,h])
 
 function plot_history(pomdp::CollisionAvoidancePOMDP, h::SimHistory, t=length(h);
-                      ymin=missing, ymax=missing)
+                      show_actions=true, action_colors=["#8c1515", :white, "#007662"],
+                      show_collision_area=true, ymin=missing, ymax=missing)
     X = get_taus(h)[1:t]
 
     plot(size=(450, 300), xlims=(0, pomdp.τ_max),
          xlabel=raw"time to closest approach ($\tau$)", ylabel=raw"relative altitude ($h_\mathrm{rel}$)",
          fontfamily="Computer Modern", framestyle=:box)
+
     hline!([0], label=false, c=:black, lw=0.5)
 
-    plot!(X, get_belief_mean_h_rel(h)[1:t], c=:gray, lw=2,
+    # belief
+    plot!(X, get_belief_mean_h_rel(h)[1:t], c=:gray, lw=2, ls=:dash,
           ribbon=get_belief_std_h_rel(h)[1:t], label=false)
 
-    plot!(X, get_h_rel(h)[1:t], label=false, xflip=true, c=:crimson, lw=2, α=0.5)
+    # true state
+    plot!(X, get_h_rel(h)[1:t], label=false, xflip=true, c=:black, lw=1)
 
-    scatter!(X, get_obs_h_rel(h)[1:t], ms=2, label=false, c=:white)
+    if show_actions
+        AI = map(a->actionindex(pomdp, a), get_actions(h))
+        markers = [:dtriangle, :square, :utriangle]
+        stroke_colors = [action_colors[1], :gray, action_colors[3]]
+        mark = [markers[ai] for ai in AI]
+        color = [action_colors[ai] for ai in AI]
+        msc = [stroke_colors[ai] for ai in AI]
+        ms = 3
+    else
+        mark = :circle
+        color = :white
+        msc = :black
+        ms = 2
+    end
+    scatter!(X, get_obs_h_rel(h)[1:t]; ms, label=false, mark, color, msc)
+
+    if show_collision_area
+        plot!(rectangle(1, 2pomdp.collision_threshold, 0, -pomdp.collision_threshold), opacity=0.25, color=:crimson, label=false)
+    end
 
     yl = ylims()
 

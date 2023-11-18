@@ -17,11 +17,20 @@ end
 # ╔═╡ 50e31b2d-5b8c-4235-ae10-fc9831b2d4d1
 begin
 	using Pkg
-	Pkg.develop(path="../CollisionAvoidancePOMDPs.jl")
+	Pkg.develop(path="..")
+end
+
+# ╔═╡ b5498630-4deb-4a24-9179-991292fbe630
+begin
+	Pkg.add("POMCPOW")
+	using POMCPOW
 end
 
 # ╔═╡ a75d231f-afef-4d1e-9d5f-60f71e283331
 using Revise, CollisionAvoidancePOMDPs
+
+# ╔═╡ 9e7ab243-2f25-4dda-928c-554afabd216a
+using MCTS
 
 # ╔═╡ 33817805-815e-43bd-83d4-395903ff7b36
 using PlutoUI
@@ -31,35 +40,50 @@ md"""
 # Aircraft collision avoidance
 """
 
-# ╔═╡ adbd3d35-89db-4776-9fd3-56bd2d8e3044
-pomdp = CollisionAvoidancePOMDP()
-
 # ╔═╡ 5af8c4b2-d151-4110-8b25-96b7988b657c
 md"""
 # Plotting
 """
 
+# ╔═╡ adbd3d35-89db-4776-9fd3-56bd2d8e3044
+pomdp = CollisionAvoidancePOMDP(reward_reversal=-25, reward_alert=-50, 				
+								reward_collision=-200, ddh_max=1.0,
+								h_rel_range=[-10, 10], dh_rel_range=[-1, 1]);
+
 # ╔═╡ 7dc77c34-30f1-4f6d-a427-95e35bf96c55
 md"Use POMCOW: $(@bind use_pomcpow CheckBox(false))"
 
+# ╔═╡ bb7e5be9-ca30-4c72-a8fd-327c69b2155a
+md"Use Belief MCTS: $(@bind use_bmcts CheckBox(false))"
+
+# ╔═╡ 8a13cf22-a3ed-4785-9e27-9b96653e34d0
+POMDPs.isterminal(bmdp::GenerativeBeliefMDP, b::CASBelief) = isterminal(bmdp.pomdp, mean(b))
+
+# ╔═╡ 6f1db216-080f-424f-89b7-134c37a1a655
+@bind seed Slider(0:10, show_value=true)
+
+# ╔═╡ 1937f5ac-8504-440d-96ca-d3b3a07f2b63
+up = CASBeliefUpdater(pomdp)
+
 # ╔═╡ 0d26e906-e24b-4419-a92f-07e2d81b64c4
 if use_pomcpow
-	Pkg.add("POMCPOW")
-	using POMCPOW
-	solver = POMCPOWSolver()
+	solver = POMCPOWSolver(max_depth=pomdp.τ_max+1)
+	policy = solve(solver, pomdp)
+elseif use_bmcts
+	bmdp_solver = DPWSolver(n_iterations=100,
+		                    depth=Int(pomdp.τ_max+1),
+							enable_action_pw=false,
+		                    exploration_constant=200.0)
+	solver = BeliefMCTSSolver(bmdp_solver, up)
 	policy = solve(solver, pomdp)
 else
 	policy = RandomPolicy(pomdp)
 	# policy = FunctionPolicy(b->0)
 end;
 
-# ╔═╡ 6f1db216-080f-424f-89b7-134c37a1a655
-@bind seed Slider(0:10, show_value=true)
-
 # ╔═╡ d8b0b08c-3fdf-4c84-b803-a5dac74ccbfa
 begin
 	Random.seed!(seed)
-	up = CASBeliefUpdater(pomdp)
 	ds0 = initialstate(pomdp)
 	b0 = initialize_belief(up, ds0)
 	s0 = rand(b0)
@@ -69,17 +93,22 @@ end
 # ╔═╡ ce09ad64-8211-4e99-a459-a19f08eabdcf
 @bind t Slider(eachindex(h), show_value=true, default=length(h))
 
+# ╔═╡ 759bbbc9-7f8a-4d09-a882-e8f10f6e1624
+# for (r,a) in zip(get_rewards(h), get_actions(h))
+# 	@info r, a
+# end
+
+# ╔═╡ e4b44d0d-fa52-42e2-96bf-9719f85aa2e2
+isfailure(pomdp, h[end].s)
+
 # ╔═╡ 4c91339f-fef9-4e6f-abcf-1afe37c56f06
-plt = plot_history(pomdp, h, t; ymin=-350, ymax=350)
+plt = plot_history(pomdp, h, t; ymin=-350, ymax=350, show_actions=true)
 
 # ╔═╡ 5147c44d-78fb-4754-9609-b6036638e136
 plt
 
 # ╔═╡ 0d4c9d80-4c4a-469c-8946-b6b41f0ec0bf
 discounted_reward(h)
-
-# ╔═╡ e4b44d0d-fa52-42e2-96bf-9719f85aa2e2
-isfailure(pomdp, h[end].s)
 
 # ╔═╡ 1911419c-32c0-4e46-945b-8eaeab5bc243
 get_actions(h)
@@ -98,7 +127,7 @@ begin
 	ds02 = initialstate(pomdp)
 	b02 = initialize_belief(up, ds02)
 	s02 = [0.0, 0.0, 0, pomdp2.τ_max]
-	h2 = simulate(HistoryRecorder(), pomdp2, policy2, up2, b02, s02)
+	h2 = simulate(HistoryRecorder(max_steps=41), pomdp2, policy2, up2, b02, s02)
 end
 
 # ╔═╡ cf0639e9-ee9b-4bf6-87aa-da078fb1cb03
@@ -106,6 +135,20 @@ isfailure(pomdp2, h2[end].s)
 
 # ╔═╡ 633a9f8d-40a9-4da0-829b-50bf44f9e173
 plt2 = plot_history(pomdp2, h2, t; ymin=-350, ymax=350)
+
+# ╔═╡ 402b3c87-06b2-42bc-847d-1d4ba422fa72
+# for (t, sp, r, ai) in stepthrough(pomdp, policy, up, b0, s0, "t, sp, r, action_info")
+# 	@info t, sp, r
+# end
+
+# ╔═╡ a7c46898-f051-4463-8448-4112b88babc6
+isterminal(pomdp, mean(b0))
+
+# ╔═╡ d05b74e2-5aea-4619-a6ff-48c5f8cbfb07
+mean(b0)
+
+# ╔═╡ 6776676b-cf5d-4112-9fc3-678c25a8316c
+b0.ukf
 
 # ╔═╡ 46e0f178-378b-4eb1-b3c1-fe4b90b6bd63
 md"""
@@ -144,26 +187,36 @@ docs(:update)
 # ╠═a75d231f-afef-4d1e-9d5f-60f71e283331
 # ╟─3f1fcc8a-f810-46bf-9ecc-109180143a78
 # ╠═5147c44d-78fb-4754-9609-b6036638e136
-# ╠═adbd3d35-89db-4776-9fd3-56bd2d8e3044
 # ╟─c2cd033a-d9c3-4568-beb4-02efe1492a02
 # ╟─2cfe158a-0f0d-42e6-bd91-4ca10114d29d
 # ╟─49d51e0c-ed4b-40e3-8e07-fe48350dabca
 # ╟─eaa79ae4-a4fa-4030-9dd2-452a24338394
 # ╟─f69e9d03-ff87-448c-a447-59b14518c047
 # ╟─5af8c4b2-d151-4110-8b25-96b7988b657c
+# ╠═b5498630-4deb-4a24-9179-991292fbe630
+# ╠═9e7ab243-2f25-4dda-928c-554afabd216a
+# ╠═adbd3d35-89db-4776-9fd3-56bd2d8e3044
 # ╟─7dc77c34-30f1-4f6d-a427-95e35bf96c55
+# ╟─bb7e5be9-ca30-4c72-a8fd-327c69b2155a
+# ╠═8a13cf22-a3ed-4785-9e27-9b96653e34d0
 # ╠═0d26e906-e24b-4419-a92f-07e2d81b64c4
 # ╠═6f1db216-080f-424f-89b7-134c37a1a655
+# ╠═1937f5ac-8504-440d-96ca-d3b3a07f2b63
 # ╠═d8b0b08c-3fdf-4c84-b803-a5dac74ccbfa
 # ╠═ce09ad64-8211-4e99-a459-a19f08eabdcf
+# ╠═759bbbc9-7f8a-4d09-a882-e8f10f6e1624
+# ╠═e4b44d0d-fa52-42e2-96bf-9719f85aa2e2
 # ╠═4c91339f-fef9-4e6f-abcf-1afe37c56f06
 # ╠═0d4c9d80-4c4a-469c-8946-b6b41f0ec0bf
-# ╠═e4b44d0d-fa52-42e2-96bf-9719f85aa2e2
 # ╠═1911419c-32c0-4e46-945b-8eaeab5bc243
 # ╟─3f6abaca-63be-4046-831c-5875bef14c4e
 # ╠═051ae044-a5ca-4360-886d-ebfb134ae6c9
 # ╠═cf0639e9-ee9b-4bf6-87aa-da078fb1cb03
 # ╠═633a9f8d-40a9-4da0-829b-50bf44f9e173
+# ╠═402b3c87-06b2-42bc-847d-1d4ba422fa72
+# ╠═a7c46898-f051-4463-8448-4112b88babc6
+# ╠═d05b74e2-5aea-4619-a6ff-48c5f8cbfb07
+# ╠═6776676b-cf5d-4112-9fc3-678c25a8316c
 # ╟─46e0f178-378b-4eb1-b3c1-fe4b90b6bd63
 # ╠═33817805-815e-43bd-83d4-395903ff7b36
 # ╠═6fd348b4-6de4-4ed2-b9e4-fdc101c0cbbb

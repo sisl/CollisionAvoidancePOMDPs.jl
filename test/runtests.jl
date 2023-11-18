@@ -104,6 +104,7 @@ end
     h = simulate(HistoryRecorder(), pomdp, policy, up)
     plot_history(pomdp, h)
     plot_history(pomdp, h; ymin=-350, ymax=350)
+    plot_history(pomdp, h; show_actions=false)
     get_actions(h)
     get_h_rel(h)
     get_dh_rel(h)
@@ -112,5 +113,6 @@ end
     get_obs_h_rel(h)
     get_belief_mean_h_rel(h)
     get_belief_std_h_rel(h)
+    get_rewards(h)
     @test true
 end

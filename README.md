@@ -14,16 +14,18 @@ Included is an implementation of the unscented Kalman filter for belief updating
 
 ```julia
 @with_kw struct CollisionAvoidancePOMDP <: POMDP{Vector{Float64}, Float64, Vector{Float64}}
-    h_rel_range::Vector{Float64} = [-100, 100] # relative altitudes [m]
-    dh_rel_range::Vector{Float64} = [-10, 10]  # relative vertical rates [m²]
-    ddh_max::Float64 = 1.0                     # vertical acceleration limit [m/s²]
-    τ_max::Float64 = 40.0                      # max time to closest approach [s]
-    collision_threshold::Float64 = 50.0        # collision threshold [m]
-    reward_collision::Float64 = -100.0         # reward obtained if collision occurs
-    reward_change::Float64 = -1                # reward obtained if action changes
+    h_rel_range::Vector{Real} = [-10, 10] # initial relative altitudes [m]
+    dh_rel_range::Vector{Real} = [-1, 1]  # initial relative vertical rates [m²]
+    ddh_max::Real = 1.0                   # vertical acceleration limit [m/s²]
+    τ_max::Real = 40                      # max time to closest approach [s]
+    actions::Vector{Real} = [-5, 0.0, 5]  # relative vertical rate actions [m/s²]
+    collision_threshold::Real = 50        # collision threshold [m]
+    reward_collision::Real = -100         # reward obtained if collision occurs
+    reward_reversal::Real = -25           # reward obtained if action reverses direction (e.g., from +5 to -5)
+    reward_alert::Real = -50              # reward obtained if alerted (i.e., non-zero vertical rates)
     px = DiscreteNonParametric([2.0, 0.0, -2.0], [0.25, 0.5, 0.25]) # transition noise on relative vertical rate [m/s²]
-    σobs = [15, 1, eps(), 5]                   # observation noise [h_rel, dh_rel, a_prev, τ]
-    γ = 0.99                                   # discount factor
+    σobs::Vector{Real} = [15, 1, eps(), eps()] # observation noise [h_rel, dh_rel, a_prev, τ]
+    γ::Real = 0.99                        # discount factor
 end
 ```
 

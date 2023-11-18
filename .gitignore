@@ -1,3 +1,4 @@
 Manifest.toml
 coverage/
 src/*.html
+src/*.cov

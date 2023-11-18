@@ -1,14 +1,16 @@
 @with_kw struct CollisionAvoidancePOMDP <: POMDP{Vector{Float64}, Float64, Vector{Float64}}
-    h_rel_range::Vector{Float64} = [-100, 100] # relative altitudes [m]
-    dh_rel_range::Vector{Float64} = [-10, 10]  # relative vertical rates [m²]
-    ddh_max::Float64 = 1.0                     # vertical acceleration limit [m/s²]
-    τ_max::Float64 = 40.0                      # max time to closest approach [s]
-    collision_threshold::Float64 = 50.0        # collision threshold [m]
-    reward_collision::Float64 = -100.0         # reward obtained if collision occurs
-    reward_change::Float64 = -1                # reward obtained if action changes
+    h_rel_range::Vector{Real} = [-10, 10] # initial relative altitudes [m]
+    dh_rel_range::Vector{Real} = [-1, 1]  # initial relative vertical rates [m²]
+    ddh_max::Real = 1.0                   # vertical acceleration limit [m/s²]
+    τ_max::Real = 40                      # max time to closest approach [s]
+    actions::Vector{Real} = [-5, 0.0, 5]  # relative vertical rate actions [m/s²]
+    collision_threshold::Real = 50        # collision threshold [m]
+    reward_collision::Real = -100         # reward obtained if collision occurs
+    reward_reversal::Real = -25           # reward obtained if action reverses direction (e.g., from +5 to -5)
+    reward_alert::Real = -50              # reward obtained if alerted (i.e., non-zero vertical rates)
     px = DiscreteNonParametric([2.0, 0.0, -2.0], [0.25, 0.5, 0.25]) # transition noise on relative vertical rate [m/s²]
-    σobs = [15, 1, eps(), eps()]               # observation noise [h_rel, dh_rel, a_prev, τ]
-    γ = 0.99                                   # discount factor
+    σobs::Vector{Real} = [15, 1, eps(), eps()] # observation noise [h_rel, dh_rel, a_prev, τ]
+    γ::Real = 0.99                        # discount factor
 end
 
 @doc raw"""
@@ -27,7 +29,7 @@ function POMDPs.initialstate(pomdp::CollisionAvoidancePOMDP)
     return product_distribution(h_rel, dh_rel, a_prev, τ)
 end
 
-POMDPs.actions(pomdp::CollisionAvoidancePOMDP) = [-5.0, 0.0, 5.0]
+POMDPs.actions(pomdp::CollisionAvoidancePOMDP) = pomdp.actions
 POMDPs.actionindex(m::CollisionAvoidancePOMDP, a) = findfirst(actions(m) .== a)
 POMDPs.discount(pomdp::CollisionAvoidancePOMDP) = pomdp.γ
 
@@ -50,17 +52,22 @@ function POMDPs.transition(pomdp::CollisionAvoidancePOMDP, s, a)
     return T
 end
 
-function POMDPs.reward(mdp::CollisionAvoidancePOMDP, s, a)
-    h, dh, a_prev, τ = s
+function POMDPs.reward(pomdp::CollisionAvoidancePOMDP, s, a)
+    h_rel, dh_rel, a_prev, τ = s
     r = 0.0
-    if isfailure(mdp, s)
-        # We collided
-        r += mdp.reward_collision
+    if isfailure(pomdp, s)
+        # Collided
+        r += pomdp.reward_collision
     end
-    if a != a_prev
-        # We changed our action
-        r += mdp.reward_change
+    if a_prev == 0 && a != 0
+        # Alerted
+        r += pomdp.reward_alert
     end
+    if a_prev != 0 && a != 0 && a != a_prev
+        # Reversed the action
+        r += pomdp.reward_reversal
+    end
+    # r += -abs(h_rel) # minimize separation
     return r
 end
 
@@ -81,13 +88,13 @@ function POMDPs.gen(pomdp::CollisionAvoidancePOMDP, s, a,
 end
 
 function POMDPs.isterminal(pomdp::CollisionAvoidancePOMDP, s)
-    h, dh, a_prev, τ = s
+    h_rel, dh_rel, a_prev, τ = s
     return τ < 0.0
 end
 
 function isfailure(pomdp::CollisionAvoidancePOMDP, s)
-    h, dh, a_prev, τ = s
-    return abs(h) < pomdp.collision_threshold && abs(τ) < eps()
+    h_rel, dh_rel, a_prev, τ = s
+    return abs(h_rel) < pomdp.collision_threshold && abs(τ) < eps()
 end
 
 POMDPs.convert_s(::Type{Vector{Float32}}, s::Vector{Float64}, ::CollisionAvoidancePOMDP) = Float32.(s)
