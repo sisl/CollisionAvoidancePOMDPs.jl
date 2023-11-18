@@ -67,7 +67,7 @@ function POMDPs.reward(pomdp::CollisionAvoidancePOMDP, s, a)
         # Reversed the action
         r += pomdp.reward_reversal
     end
-    # r += -abs(h_rel) # minimize separation
+    r += -abs(h_rel)/10 # minimize separation
     return r
 end
 
