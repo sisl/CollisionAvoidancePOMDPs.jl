@@ -12,7 +12,8 @@ rectangle(w, h, x, y) = Shape(x .+ [0,w,w,0], y .+ [0,0,h,h])
 
 function plot_history(pomdp::CollisionAvoidancePOMDP, h::SimHistory, t=length(h);
                       show_actions=true, action_colors=["#8c1515", :white, "#007662"],
-                      show_collision_area=true, ymin=missing, ymax=missing)
+                      show_collision_area=true, show_aircraft=true,
+                      ymin=missing, ymax=missing)
     X = get_taus(h)[1:t]
 
     plot(size=(450, 300), xlims=(0, pomdp.τ_max),
@@ -57,5 +58,23 @@ function plot_history(pomdp::CollisionAvoidancePOMDP, h::SimHistory, t=length(h)
         ymax = max(yl[2], pomdp.h_rel_range[2])
     end
 
-    return ylims!(min(ymin, -abs(ymax)), max(abs(ymin), ymax))
+    ylims!(min(ymin, -abs(ymax)), max(abs(ymin), ymax))
+
+    if show_aircraft
+        overlay_aircraft!()
+    end
+
+    return plot!()
+end
+
+function overlay_aircraft!()
+	img = load("../img/airplane.png")
+	xl = xlims()
+	yl = ylims()
+	ratio = sum(abs.(xl)) / (sum(abs.(yl)) + sum(abs.(xl)))
+	width = 4
+	height = width / ratio
+    X = [0, width - 1]
+    Y = [-height/2, height/2]
+	return plot!(X, Y, reverse(img, dims=1), yflip=false, ratio=:none)
 end

@@ -1,6 +1,7 @@
 module CollisionAvoidancePOMDPs
 
 using LinearAlgebra
+using Images
 using Parameters
 using Reexport
 @reexport using Distributions
