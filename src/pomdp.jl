@@ -9,6 +9,8 @@
     reward_collision::Real = -100           # reward obtained if collision occurs
     reward_reversal::Real = -1              # reward obtained if action reverses direction (e.g., from +5 to -5)
     reward_alert::Real = -1                 # reward obtained if alerted (i.e., non-zero vertical rates)
+    apply_continuous_alerting_cost::Bool = true # apply penalty during any alert, not just the first alert
+    apply_min_separation_cost::Bool = false # apply penalty based on separation to be minimized
     px = DiscreteNonParametric([1, 0.0, -1], [0.25, 0.5, 0.25]) # transition noise on relative vertical rate [m/s²]
     σobs::Vector{Real} = [15, 1, eps(), eps()] # observation noise [h_rel, dh_rel, a_prev, τ]
     γ::Real = 0.99                          # discount factor
@@ -62,21 +64,24 @@ function POMDPs.reward(pomdp::CollisionAvoidancePOMDP, s, a)
         # Collided
         r += pomdp.reward_collision
     end
-    # if a != 0
-    #     # Alerting
-    #     r += pomdp.reward_alert
-    # end
-    if a_prev == 0 && a != 0
-        # Alerted
-        r += pomdp.reward_alert
+    if pomdp.apply_continuous_alerting_cost
+        if a != 0
+            # Alerting
+            r += pomdp.reward_alert
+        end
+    else
+        if a_prev == 0 && a != 0
+            # Alerted
+            r += pomdp.reward_alert
+        end
     end
     if a_prev != 0 && a != 0 && a != a_prev
         # Reversed the action
         r += pomdp.reward_reversal
     end
-    # if abs(τ) < eps()
-        # r += -abs(h_rel) # minimize separation
-    # end
+    if pomdp.apply_min_separation_cost && abs(τ) < eps()
+        r += -abs(h_rel) # minimize separation
+    end
     return r
 end
 
