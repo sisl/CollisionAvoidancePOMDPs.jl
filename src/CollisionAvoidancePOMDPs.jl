@@ -1,8 +1,11 @@
 module CollisionAvoidancePOMDPs
 
+using Distributed
 using LinearAlgebra
 using Images
 using Parameters
+using ProgressMeter
+using ImageFiltering
 using Reexport
 @reexport using Distributions
 @reexport using Plots
@@ -31,7 +34,8 @@ export
     get_belief_std_h_rel,
     get_rewards,
     generate_histories,
-    plot_histories
+    plot_histories,
+    cas_policy_plot
 
 include("pomdp.jl")
 include("ukf.jl")

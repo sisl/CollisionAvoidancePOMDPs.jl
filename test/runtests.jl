@@ -108,6 +108,7 @@ end
     plot_history(pomdp, h; show_actions=false)
     plot_history(pomdp, h; show_actions=true, show_zero_actions=false)
     H = generate_histories(pomdp, policy, up, 2)
+    _ = generate_histories(pomdp, policy, up, 2; parallel=true)
     plot_histories(pomdp, H)
     get_actions(h)
     get_h_rel(h)

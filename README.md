@@ -20,18 +20,18 @@ Included is an implementation of the unscented Kalman filter for belief updating
 -->
 
 ```julia
-@with_kw struct CollisionAvoidancePOMDP <: POMDP{Vector{Float64}, Float64, Vector{Float64}}
+@with_kw mutable struct CollisionAvoidancePOMDP <: POMDP{Vector{Float64}, Float64, Vector{Float64}}
     h_rel_range::Vector{Real} = [-150, 150] # initial relative altitudes [m]
-    dh_rel_range::Vector{Real} = [-1, 1]    # initial relative vertical rates [m²]
+    dh_rel_range::Vector{Real} = [-1e-6, 1e-6] # initial relative vertical rates [m²]
     ddh_max::Real = 1.0                     # vertical acceleration limit [m/s²]
     τ_max::Real = 40                        # max time to closest approach [s]
-    actions::Vector{Real} = [-5, 0.0, 5]    # relative vertical rate actions [m/s²]
+    actions::Vector{Real} = [0.0, -5, 5]    # relative vertical rate actions [m/s²]
     a_prev_zero::Bool = true                # whether to update `a_prev` when the action is zero
     collision_threshold::Real = 50          # collision threshold [m]
     reward_collision::Real = -100           # reward obtained if collision occurs
     reward_reversal::Real = -1              # reward obtained if action reverses direction (e.g., from +5 to -5)
     reward_alert::Real = -1                 # reward obtained if alerted (i.e., non-zero vertical rates)
-    apply_continuous_alerting_cost::Bool = true # apply penalty during any alert, not just the first alert
+    apply_continuous_alerting_cost::Bool = false # apply penalty during any alert, not just the first alert
     apply_min_separation_cost::Bool = false # apply penalty based on separation to be minimized
     px = DiscreteNonParametric([1, 0.0, -1], [0.25, 0.5, 0.25]) # transition noise on relative vertical rate [m/s²]
     σobs::Vector{Real} = [15, 1, eps(), eps()] # observation noise [h_rel, dh_rel, a_prev, τ]

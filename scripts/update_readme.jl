@@ -1,4 +1,4 @@
-r_struct = r"@with_kw struct CollisionAvoidancePOMDP <: POMDP\{Vector\{Float64\}, Float64, Vector\{Float64\}\}(.|\n)*?end"
+r_struct = r"@with_kw mutable struct CollisionAvoidancePOMDP <: POMDP\{Vector\{Float64\}, Float64, Vector\{Float64\}\}(.|\n)*?end"
 
 filename_pomdp = joinpath(@__DIR__, "..", "src", "pomdp.jl")
 filename_readme = joinpath(@__DIR__, "..", "README.md")
