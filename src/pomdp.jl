@@ -53,14 +53,16 @@ function POMDPs.transition(pomdp::CollisionAvoidancePOMDP, s, a)
     end
     τ = max(τ - 1.0, -1.0)
 
-    T = SparseCat([Float32[h_rel, dh_rel+x, a_prev, τ] for x in pomdp.px.support], pomdp.px.p)
+    T = SparseCat([[h_rel, dh_rel+x, a_prev, τ] for x in pomdp.px.support], pomdp.px.p)
     return T
 end
 
 function POMDPs.reward(pomdp::CollisionAvoidancePOMDP, s, a)
     h_rel, dh_rel, a_prev, τ = s
+
     r = 0.0
-    if isfailure(pomdp, s)
+    is_nmac, is_alert, is_reversal = isfailure(pomdp, s, a)
+    if is_nmac
         # Collided
         r += pomdp.reward_collision
     end
@@ -70,12 +72,12 @@ function POMDPs.reward(pomdp::CollisionAvoidancePOMDP, s, a)
             r += pomdp.reward_alert
         end
     else
-        if a_prev == 0 && a != 0
+        if is_alert
             # Alerted
             r += pomdp.reward_alert
         end
     end
-    if a_prev != 0 && a != 0 && a != a_prev
+    if is_reversal
         # Reversed the action
         r += pomdp.reward_reversal
     end
@@ -106,9 +108,12 @@ function POMDPs.isterminal(pomdp::CollisionAvoidancePOMDP, s)
     return τ < 0.0
 end
 
-function isfailure(pomdp::CollisionAvoidancePOMDP, s)
+function isfailure(pomdp::CollisionAvoidancePOMDP, s, a, sp=missing)
     h_rel, dh_rel, a_prev, τ = s
-    return abs(h_rel) < pomdp.collision_threshold && τ < eps()
+    is_nmac = abs(h_rel) < pomdp.collision_threshold && τ < eps()
+    is_alert = a_prev == 0 && a != 0 # alert
+    is_reversal = a_prev != 0 && a != 0 && a != a_prev # reversal
+    return [is_nmac, is_alert, is_reversal]
 end
 
 POMDPs.convert_s(::Type{Vector{Float32}}, s::Vector{Float64}, ::CollisionAvoidancePOMDP) = Float32.(s)
