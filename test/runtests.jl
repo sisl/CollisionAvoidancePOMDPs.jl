@@ -76,7 +76,7 @@ end
     @test true
 end
 
-@testset "Collision" begin
+@testset "NMAC" begin
     pomdp = CollisionAvoidancePOMDP(px=DiscreteNonParametric([0.0], [1.0]))
     up = CASBeliefUpdater(pomdp)
     policy = FunctionPolicy(b->0)
@@ -84,7 +84,8 @@ end
     b0 = initialize_belief(up, ds0)
     s0 = [0.0, 0.0, 0, pomdp.τ_max]
     h = simulate(HistoryRecorder(), pomdp, policy, up, b0, s0)
-    @test isfailure(pomdp, h[end].s)
+    is_nmac, is_alert, is_reversal = isfailure(pomdp, h[end].s)
+    @test is_nmac && !is_alert && !is_reversal
 end
 
 @testset "UKF" begin
